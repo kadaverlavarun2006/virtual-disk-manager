@@ -3,9 +3,9 @@ import { createFileSystem, allocateSequential, allocateLinked, allocateIndexed, 
 import { HardDrive, Plus, Trash2, ChevronDown } from "lucide-react";
 
 const BLOCK_COLORS = [
-  "hsl(210, 100%, 55%)", "hsl(265, 85%, 60%)", "hsl(142, 72%, 45%)",
-  "hsl(38, 92%, 50%)", "hsl(185, 85%, 50%)", "hsl(340, 80%, 55%)",
-  "hsl(30, 90%, 55%)", "hsl(200, 80%, 50%)",
+  "hsl(213, 58%, 48%)", "hsl(190, 42%, 42%)", "hsl(152, 38%, 38%)",
+  "hsl(35, 62%, 44%)", "hsl(215, 35%, 52%)", "hsl(340, 38%, 48%)",
+  "hsl(24, 55%, 46%)", "hsl(200, 48%, 44%)",
 ];
 
 export default function FileAllocationPage() {
@@ -50,50 +50,50 @@ export default function FileAllocationPage() {
       <div className="mt-7 grid gap-5 lg:grid-cols-3">
         {/* Controls */}
         <div className="space-y-4">
-          <div className="glass rounded-2xl p-6 space-y-4">
+          <div className="glass rounded-md p-5 space-y-4">
             <h2 className="font-bold">Disk Setup</h2>
             <div>
               <label className="text-sm font-medium text-muted-foreground mb-1 block">Total Blocks</label>
               <input type="number" value={totalBlocks} onChange={e => setTotalBlocks(+e.target.value)} min={8} max={256}
-                className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm" />
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors" />
             </div>
-            <button onClick={resetFs} className="w-full py-2.5 rounded-xl glass font-semibold text-sm hover:bg-muted transition-all">
+            <button onClick={resetFs} className="w-full rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-muted transition-colors">
               Reset Disk
             </button>
           </div>
 
-          <div className="glass rounded-2xl p-6 space-y-4">
+          <div className="glass rounded-md p-5 space-y-4">
             <h2 className="font-bold">Create File</h2>
-            {error && <div className="bg-destructive/10 text-destructive text-sm rounded-lg p-2">{error}</div>}
+            {error && <div role="alert" className="border-l-2 border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>}
             <input placeholder="File name" value={fileName} onChange={e => setFileName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm" />
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors" />
             <input type="number" value={fileSize} onChange={e => setFileSize(+e.target.value)} min={1} placeholder="Size (blocks)"
-              className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm" />
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors" />
             <div className="relative">
               <select value={method} onChange={e => setMethod(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm appearance-none">
+                className="w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors">
                 <option value="sequential">Sequential</option>
                 <option value="linked">Linked</option>
                 <option value="indexed">Indexed</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             </div>
-            <button onClick={allocate} className="w-full py-2.5 rounded-xl gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity text-sm">
+            <button onClick={allocate} className="w-full rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
               <Plus className="w-4 h-4" /> Allocate
             </button>
           </div>
 
           {/* File List */}
-          <div className="glass rounded-2xl p-6">
+          <div className="glass rounded-md p-5">
             <h2 className="font-bold mb-3">Files ({fs.files.length})</h2>
             {fs.files.length === 0 ? (
               <p className="text-sm text-muted-foreground">No files allocated yet</p>
             ) : (
               <div className="space-y-2">
                 {fs.files.map(f => (
-                  <div key={f.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                  <div key={f.id} className="flex items-center justify-between border-t border-border py-2">
                     <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full" style={{ background: fileColorMap[f.id] }} />
+                      <span className="h-2.5 w-2.5 rounded-sm" style={{ background: fileColorMap[f.id] }} />
                       <span className="text-sm font-medium">{f.name}</span>
                       <span className="text-xs text-muted-foreground">({f.size} blocks, {f.method})</span>
                     </div>
@@ -108,8 +108,11 @@ export default function FileAllocationPage() {
         </div>
 
         {/* Block Grid */}
-        <div className="glass rounded-2xl p-5 lg:col-span-2 sm:p-6">
-          <h2 className="font-bold mb-4">Disk Blocks</h2>
+        <div className="glass rounded-md p-4 lg:col-span-2 sm:p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="font-semibold">Disk blocks</h2>
+            <span className="text-xs text-muted-foreground">{totalBlocks} blocks</span>
+          </div>
           <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
             {fs.blocks.map(block => {
               const file = fs.files.find(f => f.id === block.fileId);
@@ -117,7 +120,7 @@ export default function FileAllocationPage() {
               return (
                 <div
                   key={block.id}
-                  className={`relative aspect-square rounded-lg border flex flex-col items-center justify-center text-xs transition-all ${
+                    className={`relative aspect-square rounded-sm border flex flex-col items-center justify-center text-xs transition-colors ${
                     block.fileId ? 'border-transparent' : 'border-border bg-muted/20'
                   }`}
                   style={color ? { background: color + '22', borderColor: color } : undefined}
@@ -135,11 +138,11 @@ export default function FileAllocationPage() {
           {/* Legend */}
           <div className="mt-4 flex flex-wrap gap-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="w-3 h-3 rounded border border-border bg-muted/20" /> Free
+              <span className="h-3 w-3 rounded-sm border border-border bg-muted/20" /> Free
             </div>
             {fs.files.map(f => (
               <div key={f.id} className="flex items-center gap-1.5 text-xs">
-                <span className="w-3 h-3 rounded" style={{ background: fileColorMap[f.id] }} />
+                <span className="h-3 w-3 rounded-sm" style={{ background: fileColorMap[f.id] }} />
                 {f.name}
               </div>
             ))}

@@ -12,7 +12,7 @@ export default function Navbar() {
   const [dark, setDark] = useState(() => {
     if (typeof window === "undefined") return true;
     const savedTheme = window.localStorage.getItem("theme");
-    return savedTheme ? savedTheme === "dark" : true;
+    return savedTheme ? savedTheme === "dark" : false;
   });
 
   useEffect(() => {
@@ -21,11 +21,11 @@ export default function Navbar() {
   }, [dark]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-2xl">
-      <div className="container mx-auto flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-2">
-        <Link to="/" className="flex items-center gap-2.5 font-bold tracking-tight">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary shadow-lg shadow-primary/20">
-            <HardDrive className="h-5 w-5 text-primary-foreground" />
+    <header className="sticky top-0 z-50 border-b border-border bg-background">
+      <div className="container mx-auto flex min-h-14 flex-wrap items-center justify-between gap-2 px-4 py-2">
+        <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
+            <HardDrive className="h-4 w-4 text-primary-foreground" />
           </span>
           <span className="text-base sm:text-lg">Virtual Disk <span className="text-primary">Manager</span></span>
         </Link>
@@ -35,8 +35,8 @@ export default function Navbar() {
             <NavLink
               key={to}
               to={to}
-              className={({ isActive }) => `flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+              className={({ isActive }) => `flex shrink-0 items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
+                isActive ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -54,7 +54,7 @@ export default function Navbar() {
             type="button"
             aria-label={`Switch to ${dark ? "light" : "dark"} theme`}
             onClick={() => setDark(!dark)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>

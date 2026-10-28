@@ -6,7 +6,7 @@ import { saveSimulation } from "@/lib/simulationHistory";
 
 const ALGO_MAP = { fcfs, sstf, scan, cscan, look, clook };
 const ALGO_LABELS = { fcfs: "FCFS", sstf: "SSTF", scan: "SCAN", cscan: "C-SCAN", look: "LOOK", clook: "C-LOOK" };
-const COLORS = { fcfs: "#3b82f6", sstf: "#8b5cf6", scan: "#22c55e", cscan: "#f59e0b", look: "#06b6d4", clook: "#ec4899" };
+const COLORS = { fcfs: "#315f9c", sstf: "#3c8992", scan: "#46866b", cscan: "#ad7a34", look: "#626d8c", clook: "#9a5962" };
 
 export default function DiskSchedulingPage() {
   const [cylinders, setCylinders] = useState(200);
@@ -108,9 +108,9 @@ export default function DiskSchedulingPage() {
   const animatedData = animStep >= 0 ? chartData.slice(0, animStep + 2) : chartData;
 
   return (
-    <main className="container mx-auto max-w-6xl space-y-7 px-4 py-8 sm:py-12">
+    <main className="container mx-auto max-w-6xl space-y-6 px-4 py-7 sm:py-9">
       <div>
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+        <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
           <Activity className="h-3.5 w-3.5" /> Interactive simulator
         </div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Disk scheduling</h1>
@@ -118,23 +118,23 @@ export default function DiskSchedulingPage() {
       </div>
 
       {/* Input Panel */}
-      <div className="glass rounded-2xl p-5 shadow-xl shadow-black/5 sm:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="glass rounded-md p-4 sm:p-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className="text-sm font-medium text-muted-foreground mb-1 block">Cylinders</label>
             <input type="number" value={cylinders} onChange={e => setCylinders(+e.target.value)} min={1}
-              className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm" />
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors" />
           </div>
           <div>
             <label className="text-sm font-medium text-muted-foreground mb-1 block">Initial Head Position</label>
             <input type="number" value={head} onChange={e => setHead(+e.target.value)} min={0} max={cylinders - 1}
-              className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm" />
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors" />
           </div>
           <div>
             <label className="text-sm font-medium text-muted-foreground mb-1 block">Algorithm</label>
             <div className="relative">
               <select value={selectedAlgo} onChange={e => setSelectedAlgo(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm appearance-none">
+                className="w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors">
                 {Object.entries(ALGO_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -144,7 +144,7 @@ export default function DiskSchedulingPage() {
             <label className="text-sm font-medium text-muted-foreground mb-1 block">Direction</label>
             <div className="relative">
               <select value={direction} onChange={e => setDirection(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm appearance-none">
+                className="w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary outline-none transition-colors">
                 <option value="left">Left</option>
                 <option value="right">Right</option>
               </select>
@@ -155,21 +155,21 @@ export default function DiskSchedulingPage() {
         <div>
           <label className="text-sm font-medium text-muted-foreground mb-1 block">Request Queue (comma-separated)</label>
           <input value={requestStr} onChange={e => setRequestStr(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl bg-muted/50 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm font-mono" />
+            className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm focus:border-primary outline-none transition-colors" />
         </div>
         {runError && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{runError}</p>}
-        <div className="flex flex-wrap gap-3">
-          <button onClick={runAlgorithm} className="px-5 py-2.5 rounded-xl gradient-primary text-primary-foreground font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity text-sm">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={runAlgorithm} className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
             <Play className="w-4 h-4" /> Run
           </button>
-          <button onClick={compareAll} className="px-5 py-2.5 rounded-xl bg-accent text-accent-foreground font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity text-sm">
+          <button onClick={compareAll} className="flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted">
             Compare All
           </button>
-          <button onClick={randomize} className="px-5 py-2.5 rounded-xl glass font-semibold flex items-center gap-2 hover:bg-muted transition-all text-sm">
+          <button onClick={randomize} className="flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted">
             <Shuffle className="w-4 h-4" /> Random
           </button>
           {result && (
-            <button onClick={animate} className="px-5 py-2.5 rounded-xl glass font-semibold flex items-center gap-2 hover:bg-muted transition-all text-sm">
+            <button onClick={animate} className="flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted">
               <RotateCcw className="w-4 h-4" /> Animate
             </button>
           )}
@@ -179,7 +179,7 @@ export default function DiskSchedulingPage() {
       {/* Single Result */}
       {result && !comparing && (
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 glass rounded-2xl p-6">
+          <div className="glass rounded-md p-4 sm:p-5 lg:col-span-2">
             <h2 className="text-lg font-bold mb-4">Head movement <span className="text-primary">/ {ALGO_LABELS[displayedAlgorithm]}</span></h2>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={animatedData}>
@@ -191,8 +191,8 @@ export default function DiskSchedulingPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="space-y-4">
-            <div className="glass rounded-2xl p-6">
+          <div className="space-y-3">
+            <div className="glass rounded-md p-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Metrics</h3>
               <div className="space-y-3">
                 <div className="flex justify-between"><span className="text-sm text-muted-foreground">Total Seek Time</span><span className="font-bold text-primary">{result.totalSeekTime}</span></div>
@@ -200,11 +200,11 @@ export default function DiskSchedulingPage() {
                 <div className="flex justify-between"><span className="text-sm text-muted-foreground">Requests Served</span><span className="font-bold">{result.order.length}</span></div>
               </div>
             </div>
-            <div className="glass rounded-2xl p-5">
+            <div className="glass rounded-md p-4">
                 <button
                   type="button"
                   onClick={saveResult}
-                  className="w-full py-2.5 rounded-xl gradient-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity text-sm"
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   <Save className="w-4 h-4" />
                   Save to history
@@ -212,15 +212,15 @@ export default function DiskSchedulingPage() {
                 <p className="mt-2 text-center text-xs text-muted-foreground">Stored privately in this browser</p>
                 {saveMessage && <p role={saveMessage.startsWith("Unable") ? "alert" : "status"} className={`mt-3 text-sm ${saveMessage.startsWith("Unable") ? "text-destructive" : "text-emerald-400"}`}>{saveMessage}</p>}
               </div>
-            <div className="glass rounded-2xl p-6">
+            <div className="glass rounded-md p-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Execution Order</h3>
               <div className="flex flex-wrap gap-2">
                 {result.order.map((r, i) => (
-                  <span key={i} className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-mono font-medium">{r}</span>
+                  <span key={i} className="border border-border bg-muted/60 px-2 py-1 text-xs font-mono font-medium">{r}</span>
                 ))}
               </div>
             </div>
-            <div className="glass rounded-2xl p-6 max-h-48 overflow-auto">
+            <div className="glass max-h-48 overflow-auto rounded-md p-4">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Steps</h3>
               <div className="space-y-1.5 text-xs font-mono">
                 {result.steps.map((s, i) => (
@@ -238,7 +238,7 @@ export default function DiskSchedulingPage() {
       {/* Compare All */}
       {comparing && (
         <div className="space-y-6">
-          <div className="glass rounded-2xl p-6">
+          <div className="glass rounded-md p-4 sm:p-5">
             <h2 className="text-lg font-bold mb-4">Algorithm Comparison</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -264,7 +264,7 @@ export default function DiskSchedulingPage() {
               </table>
             </div>
           </div>
-          <div className="glass rounded-2xl p-6">
+          <div className="glass rounded-md p-4 sm:p-5">
             <h2 className="text-lg font-bold mb-4">Head Movement Comparison</h2>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart>

@@ -4,7 +4,7 @@ import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis
 import { Activity, ArrowRight, Clock3, HardDrive, Trash2 } from "lucide-react";
 import { clearSimulationHistory, readSimulationHistory, removeSimulation } from "@/lib/simulationHistory";
 
-const COLORS = ["#5b8cff", "#9b7bff", "#36d399", "#ffba5c", "#42d5e8", "#f472b6"];
+const COLORS = ["#315f9c", "#3c8992", "#46866b", "#ad7a34", "#626d8c", "#9a5962"];
 
 export default function DashboardPage() {
   const [simulations, setSimulations] = useState([]);
@@ -63,35 +63,35 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="container mx-auto max-w-6xl space-y-8 px-4 py-8 sm:py-12">
-      <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+    <main className="container mx-auto max-w-6xl space-y-6 px-4 py-7 sm:py-9">
+      <section className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+          <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
             <Activity className="h-3.5 w-3.5" /> Personal workspace
           </div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Simulation history</h1>
           <p className="mt-2 text-muted-foreground">Your saved runs, kept privately in this browser.</p>
         </div>
-        <Link to="/disk-scheduling" className="inline-flex items-center justify-center gap-2 rounded-xl gradient-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+        <Link to="/disk-scheduling" className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
           New simulation <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
 
-      {error && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">{error}</p>}
+      {error && <p role="alert" className="border-l-2 border-destructive bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
 
       <section className="grid gap-4 sm:grid-cols-3">
         {[
           { label: "Saved runs", value: simulations.length, icon: HardDrive, color: "text-primary" },
-          { label: "Algorithms explored", value: Object.keys(algoStats).length, icon: Activity, color: "text-violet-400" },
-          { label: "Average seek", value: averageSeek, icon: Clock3, color: "text-emerald-400" },
+          { label: "Algorithms explored", value: Object.keys(algoStats).length, icon: Activity, color: "text-primary" },
+          { label: "Average seek", value: averageSeek, icon: Clock3, color: "text-primary" },
         ].map(({ label, value, icon: Icon, color }) => (
-          <article key={label} className="glass rounded-2xl p-5 sm:p-6">
+          <article key={label} className="border-y border-border py-3 first:border-t-0 sm:border-y-0 sm:border-l sm:px-5 sm:first:border-l-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{label}</p>
                 <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
               </div>
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted/70">
+              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-muted/70">
                 <Icon className={`h-5 w-5 ${color}`} />
               </span>
             </div>
@@ -100,7 +100,7 @@ export default function DashboardPage() {
       </section>
 
       {chartData.length > 0 && (
-        <section className="glass rounded-2xl p-5 sm:p-6">
+        <section className="glass rounded-md p-4 sm:p-5">
           <div className="mb-5">
             <h2 className="text-lg font-semibold">Seek time by algorithm</h2>
             <p className="mt-1 text-sm text-muted-foreground">Average total seek distance across your saved runs.</p>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
               <XAxis dataKey="name" axisLine={false} tickLine={false} stroke="hsl(var(--muted-foreground))" fontSize={12} />
               <YAxis axisLine={false} tickLine={false} stroke="hsl(var(--muted-foreground))" fontSize={12} />
               <Tooltip cursor={{ fill: "hsl(var(--muted) / 0.45)" }} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem" }} />
-              <Bar dataKey="avgSeek" name="Avg. seek distance" radius={[7, 7, 0, 0]}>
+              <Bar dataKey="avgSeek" name="Avg. seek distance" radius={[2, 2, 0, 0]}>
                 {chartData.map((item, index) => <Cell key={item.name} fill={COLORS[index % COLORS.length]} />)}
               </Bar>
             </BarChart>
@@ -119,7 +119,7 @@ export default function DashboardPage() {
         </section>
       )}
 
-      <section className="glass overflow-hidden rounded-2xl">
+      <section className="glass overflow-hidden rounded-md">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-4 sm:px-6">
           <div>
             <h2 className="font-semibold">Recent runs</h2>
@@ -134,8 +134,8 @@ export default function DashboardPage() {
 
         {simulations.length === 0 ? (
           <div className="px-6 py-14 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <HardDrive className="h-6 w-6" />
+            <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-md bg-muted text-primary">
+              <HardDrive className="h-5 w-5" />
             </span>
             <h3 className="mt-4 font-semibold">Nothing saved yet</h3>
             <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Run a disk scheduling algorithm and save its result to start building your history.</p>
