@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { fcfs, sstf, scan, cscan, look, clook } from "@/lib/algorithms/diskScheduling";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Activity, Play, RotateCcw, Shuffle, ChevronDown, Save } from "lucide-react";
@@ -21,6 +21,9 @@ export default function DiskSchedulingPage() {
   const [runParameters, setRunParameters] = useState(null);
   const [saveMessage, setSaveMessage] = useState("");
   const [runError, setRunError] = useState("");
+  const animationRef = useRef(null);
+
+  useEffect(() => () => clearInterval(animationRef.current), []);
 
   const parseRequests = () => requestStr.split(",").map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n >= 0 && n < cylinders);
 
@@ -36,6 +39,7 @@ export default function DiskSchedulingPage() {
     }
     setRunError("");
     setSaveMessage("");
+    clearInterval(animationRef.current);
     const algo = ALGO_MAP[selectedAlgo];
     const needsDir = ['scan', 'cscan', 'look', 'clook'].includes(selectedAlgo);
     const r = needsDir
@@ -58,6 +62,7 @@ export default function DiskSchedulingPage() {
       return;
     }
     setRunError("");
+    clearInterval(animationRef.current);
     const results = {};
     for (const [name, fn] of Object.entries(ALGO_MAP)) {
       const needsDir = ['scan', 'cscan', 'look', 'clook'].includes(name);
@@ -79,11 +84,15 @@ export default function DiskSchedulingPage() {
 
   const animate = () => {
     if (!result) return;
+    clearInterval(animationRef.current);
     setAnimStep(0);
     let step = -1;
-    const interval = setInterval(() => {
+    animationRef.current = setInterval(() => {
       step++;
-      if (step >= result.seekSequence.length - 1) clearInterval(interval);
+      if (step >= result.seekSequence.length - 1) {
+        clearInterval(animationRef.current);
+        animationRef.current = null;
+      }
       setAnimStep(step);
     }, 800);
   };
@@ -108,6 +117,7 @@ export default function DiskSchedulingPage() {
   const animatedData = animStep >= 0 ? chartData.slice(0, animStep + 2) : chartData;
   const completedMoves = result ? (animStep < 0 ? result.steps.length : Math.min(animStep + 1, result.steps.length)) : 0;
   const currentHead = result ? result.seekSequence[completedMoves] : head;
+  const maxStepSeek = result ? Math.max(...result.steps.map((step) => step.seek), 1) : 1;
 
   return (
     <main className="container mx-auto max-w-6xl space-y-6 px-4 py-7 sm:py-9">
@@ -272,7 +282,7 @@ export default function DiskSchedulingPage() {
                     <span className="min-w-0">
                       <span className="block font-mono text-sm font-medium">{s.from} <span className="text-primary">→</span> {s.to}</span>
                       <span className="mt-1 block h-1 max-w-24 bg-muted">
-                        <span className="block h-full bg-primary" style={{ width: `${Math.max(4, (s.seek / Math.max(...result.steps.map((step) => step.seek), 1)) * 100)}%` }} />
+                        <span className="block h-full bg-primary" style={{ width: `${Math.max(4, (s.seek / maxStepSeek) * 100)}%` }} />
                       </span>
                     </span>
                     <span className="whitespace-nowrap text-right text-xs font-semibold">{s.seek} <span className="font-normal text-muted-foreground">cyl.</span></span>

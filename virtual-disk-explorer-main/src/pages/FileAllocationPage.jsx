@@ -15,8 +15,13 @@ export default function FileAllocationPage() {
   const [fileSize, setFileSize] = useState(4);
   const [method, setMethod] = useState('sequential');
   const [error, setError] = useState("");
+  const [selectedFileId, setSelectedFileId] = useState(null);
 
-  const resetFs = () => { setFs(createFileSystem(totalBlocks)); setError(""); };
+  const resetFs = () => {
+    setFs(createFileSystem(totalBlocks));
+    setSelectedFileId(null);
+    setError("");
+  };
 
   const allocate = () => {
     if (!fileName.trim()) { setError("Enter a file name"); return; }
@@ -27,13 +32,34 @@ export default function FileAllocationPage() {
     else if (method === 'linked') result = allocateLinked(fs, fileName, fileSize);
     else result = allocateIndexed(fs, fileName, fileSize);
     if (typeof result === 'string') setError(result);
-    else { setFs(result); setFileName(""); }
+    else {
+      setFs(result);
+      setSelectedFileId(result.files[result.files.length - 1].id);
+      setFileName("");
+    }
   };
 
-  const deleteFile = (id) => setFs(deallocateFile(fs, id));
+  const deleteFile = (id) => {
+    const updatedFs = deallocateFile(fs, id);
+    setFs(updatedFs);
+    if (selectedFileId === id) setSelectedFileId(updatedFs.files[updatedFs.files.length - 1]?.id ?? null);
+  };
 
   const fileColorMap = {};
   fs.files.forEach((f, i) => { fileColorMap[f.id] = BLOCK_COLORS[i % BLOCK_COLORS.length]; });
+  const selectedFile = fs.files.find((file) => file.id === selectedFileId) ?? null;
+  const allocationSteps = selectedFile ? getAllocationSteps(selectedFile) : [];
+  const selectedBlockSteps = {};
+  if (selectedFile) {
+    if (selectedFile.method === "indexed") {
+      selectedBlockSteps[selectedFile.indexBlock] = 1;
+      selectedFile.blocks.forEach((blockId, index) => { selectedBlockSteps[blockId] = index + 2; });
+    } else if (selectedFile.method === "sequential") {
+      selectedFile.blocks.forEach((blockId, index) => { selectedBlockSteps[blockId] = index + 2; });
+    } else {
+      selectedFile.blocks.forEach((blockId, index) => { selectedBlockSteps[blockId] = index + 1; });
+    }
+  }
 
   const cols = totalBlocks <= 16 ? 8 : totalBlocks <= 64 ? 8 : 16;
 
@@ -91,13 +117,18 @@ export default function FileAllocationPage() {
             ) : (
               <div className="space-y-2">
                 {fs.files.map(f => (
-                  <div key={f.id} className="flex items-center justify-between border-t border-border py-2">
-                    <div className="flex items-center gap-2">
+                  <div key={f.id} className={`flex items-center justify-between border-t border-border py-1 ${selectedFileId === f.id ? "bg-muted/50" : ""}`}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFileId(f.id)}
+                      aria-pressed={selectedFileId === f.id}
+                      className="flex min-w-0 flex-1 items-center gap-2 px-2 py-2 text-left"
+                    >
                       <span className="h-2.5 w-2.5 rounded-sm" style={{ background: fileColorMap[f.id] }} />
-                      <span className="text-sm font-medium">{f.name}</span>
-                      <span className="text-xs text-muted-foreground">({f.size} blocks, {f.method})</span>
-                    </div>
-                    <button onClick={() => deleteFile(f.id)} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                      <span className="truncate text-sm font-medium">{f.name}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">{f.size} blocks</span>
+                    </button>
+                    <button type="button" aria-label={`Delete ${f.name}`} onClick={() => deleteFile(f.id)} className="p-2 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -117,11 +148,12 @@ export default function FileAllocationPage() {
             {fs.blocks.map(block => {
               const file = fs.files.find(f => f.id === block.fileId);
               const color = block.fileId ? fileColorMap[block.fileId] : undefined;
+              const isSelectedBlock = block.fileId === selectedFile?.id;
               return (
                 <div
                   key={block.id}
-                    className={`relative aspect-square rounded-sm border flex flex-col items-center justify-center text-xs transition-colors ${
-                    block.fileId ? 'border-transparent' : 'border-border bg-muted/20'
+                  className={`relative flex aspect-square flex-col items-center justify-center rounded-sm border text-xs transition-colors ${
+                    isSelectedBlock ? "border-2" : block.fileId ? "border-transparent opacity-40" : "border-border bg-muted/20"
                   }`}
                   style={color ? {
                     background: `color-mix(in srgb, ${color} 14%, hsl(var(--card)))`,
@@ -130,7 +162,12 @@ export default function FileAllocationPage() {
                   title={file ? `${file.name} (${file.method})${block.isIndex ? ' [INDEX]' : ''}${block.next !== null ? ` → ${block.next}` : ''}` : `Block ${block.id} (free)`}
                 >
                   <span className="font-mono font-bold" style={color ? { color } : undefined}>{block.id}</span>
-                  {block.isIndex && <span className="text-[8px] font-bold" style={{ color }}>IDX</span>}
+                  {selectedBlockSteps[block.id] && (
+                    <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center bg-primary px-0.5 text-[9px] font-bold leading-none text-primary-foreground">
+                      {selectedBlockSteps[block.id]}
+                    </span>
+                  )}
+                  {block.isIndex && <span className="text-[8px] font-bold" style={{ color }}>INDEX</span>}
                   {block.next !== null && (
                     <span className="text-[8px]" style={{ color }}>→{block.next}</span>
                   )}
@@ -145,13 +182,77 @@ export default function FileAllocationPage() {
             </div>
             {fs.files.map(f => (
               <div key={f.id} className="flex items-center gap-1.5 text-xs">
-                <span className="h-3 w-3 rounded-sm" style={{ background: fileColorMap[f.id] }} />
-                {f.name}
+                <span className={`h-3 w-3 rounded-sm ${selectedFileId !== f.id ? "opacity-40" : ""}`} style={{ background: fileColorMap[f.id] }} />
+                <span className={selectedFileId === f.id ? "font-medium" : "text-muted-foreground"}>{f.name}</span>
               </div>
             ))}
           </div>
         </div>
+        <section className="glass rounded-md p-5 lg:col-span-3" aria-live="polite">
+          <div className="flex flex-col justify-between gap-2 border-b border-border pb-3 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Allocation walkthrough</p>
+              <h2 className="mt-1 text-lg font-semibold">
+                {selectedFile ? `${selectedFile.name} · ${selectedFile.method} allocation` : "Select or create a file to see its steps"}
+              </h2>
+            </div>
+            {selectedFile && <span className="text-xs text-muted-foreground">{allocationSteps.length} steps · numbered blocks are highlighted above</span>}
+          </div>
+          {selectedFile ? (
+            <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {allocationSteps.map((step, index) => (
+                <li key={`${step.title}-${index}`} className="flex gap-3 border border-border bg-background p-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center bg-primary text-xs font-semibold text-primary-foreground">{index + 1}</span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">{step.title}</span>
+                    <span className="mt-1 block break-words text-xs leading-5 text-muted-foreground">{step.detail}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">After allocation, select a file from the list to inspect how its blocks were assigned.</p>
+          )}
+        </section>
       </div>
     </main>
   );
+}
+
+function getAllocationSteps(file) {
+  if (file.method === "sequential") {
+    return [
+      {
+        title: "Find consecutive free blocks",
+        detail: `A run of ${file.size} blocks starts at ${file.blocks[0]} and ends at ${file.blocks[file.blocks.length - 1]}.`,
+      },
+      ...file.blocks.map((blockId, index) => ({
+        title: `Allocate block ${blockId}`,
+        detail: `This is data block ${index + 1} of ${file.size}; sequential allocation keeps the file together.`,
+      })),
+    ];
+  }
+
+  if (file.method === "linked") {
+    return file.blocks.map((blockId, index) => {
+      const nextBlock = file.blocks[index + 1];
+      return {
+        title: `Read data from block ${blockId}`,
+        detail: nextBlock === undefined
+          ? "This is the final block; its pointer marks the end of the file."
+          : `Its pointer leads to block ${nextBlock}.`,
+      };
+    });
+  }
+
+  return [
+    {
+      title: `Reserve index block ${file.indexBlock}`,
+      detail: `This block stores the addresses of all ${file.size} data blocks.`,
+    },
+    ...file.blocks.map((blockId, index) => ({
+      title: `Store data block ${index + 1} at ${blockId}`,
+      detail: `The index block points to data block ${index + 1} at disk block ${blockId}.`,
+    })),
+  ];
 }
