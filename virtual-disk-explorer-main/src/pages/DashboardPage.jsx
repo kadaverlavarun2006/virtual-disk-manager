@@ -67,7 +67,7 @@ export default function DashboardPage() {
       <section className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
           <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
-            <Activity className="h-3.5 w-3.5" /> Personal workspace
+            <Activity className="h-3.5 w-3.5" /> Local history
           </div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Simulation history</h1>
           <p className="mt-2 text-muted-foreground">Your saved runs, kept privately in this browser.</p>

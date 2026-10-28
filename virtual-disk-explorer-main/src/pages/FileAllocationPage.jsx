@@ -40,7 +40,7 @@ export default function FileAllocationPage() {
   return (
     <main className="container mx-auto max-w-6xl px-4 py-8 sm:py-12">
       <div>
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+        <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           <HardDrive className="h-3.5 w-3.5" /> Storage simulator
         </div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">File allocation</h1>
@@ -123,7 +123,10 @@ export default function FileAllocationPage() {
                     className={`relative aspect-square rounded-sm border flex flex-col items-center justify-center text-xs transition-colors ${
                     block.fileId ? 'border-transparent' : 'border-border bg-muted/20'
                   }`}
-                  style={color ? { background: color + '22', borderColor: color } : undefined}
+                  style={color ? {
+                    background: `color-mix(in srgb, ${color} 14%, hsl(var(--card)))`,
+                    borderColor: color,
+                  } : undefined}
                   title={file ? `${file.name} (${file.method})${block.isIndex ? ' [INDEX]' : ''}${block.next !== null ? ` → ${block.next}` : ''}` : `Block ${block.id} (free)`}
                 >
                   <span className="font-mono font-bold" style={color ? { color } : undefined}>{block.id}</span>

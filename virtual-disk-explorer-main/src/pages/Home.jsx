@@ -53,17 +53,17 @@ export default function Home() {
           <div className="mx-auto w-full max-w-sm border border-border bg-background p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Disk activity</p>
-                  <p className="mt-1 text-lg font-semibold">Head movement</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Example comparison</p>
+                  <p className="mt-1 text-lg font-semibold">Total seek distance</p>
                 </div>
                 <span className="rounded-md bg-muted p-2 text-primary"><HardDrive className="h-5 w-5" /></span>
               </div>
               <div className="space-y-3">
-                {[[ "FCFS", 82, "bg-primary"], ["SSTF", 54, "bg-primary/70"], ["SCAN", 68, "bg-primary/45"]].map(([label, width, color]) => (
+                {[[ "FCFS", 643, 90, "bg-primary"], ["SSTF", 205, 38, "bg-primary/70"], ["SCAN", 357, 58, "bg-primary/45"]].map(([label, value, width, color]) => (
                   <div key={label} className="border-b border-border py-2.5">
                     <div className="mb-2 flex items-center justify-between text-xs">
                       <span className="font-semibold">{label}</span>
-                      <span className="font-mono text-muted-foreground">{width * 2 + 38} tracks</span>
+                      <span className="font-mono text-muted-foreground">{value} units</span>
                     </div>
                     <div className="h-1 overflow-hidden bg-muted">
                       <div className={`h-full ${color}`} style={{ width: `${width}%` }} />

@@ -80,12 +80,12 @@ export default function DiskSchedulingPage() {
   const animate = () => {
     if (!result) return;
     setAnimStep(0);
-    let step = 0;
+    let step = -1;
     const interval = setInterval(() => {
       step++;
       if (step >= result.seekSequence.length - 1) clearInterval(interval);
       setAnimStep(step);
-    }, 500);
+    }, 800);
   };
 
   const saveResult = () => {
@@ -106,11 +106,13 @@ export default function DiskSchedulingPage() {
   const displayedAlgorithm = runParameters?.algorithm ?? selectedAlgo;
   const chartData = result ? result.seekSequence.map((pos, i) => ({ step: i, position: pos })) : [];
   const animatedData = animStep >= 0 ? chartData.slice(0, animStep + 2) : chartData;
+  const completedMoves = result ? (animStep < 0 ? result.steps.length : Math.min(animStep + 1, result.steps.length)) : 0;
+  const currentHead = result ? result.seekSequence[completedMoves] : head;
 
   return (
     <main className="container mx-auto max-w-6xl space-y-6 px-4 py-7 sm:py-9">
       <div>
-        <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
+        <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           <Activity className="h-3.5 w-3.5" /> Interactive simulator
         </div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Disk scheduling</h1>
@@ -157,7 +159,7 @@ export default function DiskSchedulingPage() {
           <input value={requestStr} onChange={e => setRequestStr(e.target.value)}
             className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm focus:border-primary outline-none transition-colors" />
         </div>
-        {runError && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{runError}</p>}
+        {runError && <p role="alert" className="border-l-2 border-destructive bg-destructive/10 p-3 text-sm text-destructive">{runError}</p>}
         <div className="flex flex-wrap gap-2">
           <button onClick={runAlgorithm} className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
             <Play className="w-4 h-4" /> Run
@@ -180,7 +182,15 @@ export default function DiskSchedulingPage() {
       {result && !comparing && (
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="glass rounded-md p-4 sm:p-5 lg:col-span-2">
-            <h2 className="text-lg font-bold mb-4">Head movement <span className="text-primary">/ {ALGO_LABELS[displayedAlgorithm]}</span></h2>
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold">Head movement <span className="text-primary">/ {ALGO_LABELS[displayedAlgorithm]}</span></h2>
+                <p className="mt-1 text-xs text-muted-foreground">Each point is a cylinder. Follow the line in request order.</p>
+              </div>
+              <span className="border border-border bg-background px-2.5 py-1 text-xs font-mono">
+                Head at <strong className="text-primary">{currentHead}</strong>
+              </span>
+            </div>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={animatedData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -190,6 +200,28 @@ export default function DiskSchedulingPage() {
                 <Line type="linear" dataKey="position" stroke={COLORS[displayedAlgorithm]} strokeWidth={2.5} dot={{ fill: COLORS[displayedAlgorithm], r: 4 }} animationDuration={300} />
               </LineChart>
             </ResponsiveContainer>
+            <div className="mt-1 border-t border-border pt-3">
+              <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+                <label htmlFor="movement-progress" className="font-medium">Playback</label>
+                <span className="font-mono text-muted-foreground">
+                  {completedMoves === result.steps.length ? "Route complete" : `Move ${completedMoves} of ${result.steps.length}`}
+                </span>
+              </div>
+              <input
+                id="movement-progress"
+                aria-label="Head movement progress"
+                type="range"
+                min="0"
+                max={result.steps.length}
+                value={animStep < 0 ? result.steps.length : animStep + 1}
+                onChange={(event) => setAnimStep(Number(event.target.value) - 1)}
+                className="w-full accent-primary"
+              />
+              <div className="mt-1 flex justify-between text-[11px] font-mono text-muted-foreground">
+                <span>Start · {runParameters.head}</span>
+                <span>Finish · {result.seekSequence[result.seekSequence.length - 1]}</span>
+              </div>
+            </div>
           </div>
           <div className="space-y-3">
             <div className="glass rounded-md p-4">
@@ -220,14 +252,31 @@ export default function DiskSchedulingPage() {
                 ))}
               </div>
             </div>
-            <div className="glass max-h-48 overflow-auto rounded-md p-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">Steps</h3>
-              <div className="space-y-1.5 text-xs font-mono">
+            <div className="glass rounded-md p-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-semibold">Movement steps</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">Distance between each consecutive request.</p>
+                </div>
+                <span className="text-xs font-mono text-muted-foreground">{result.steps.length} moves</span>
+              </div>
+              <div className="max-h-80 space-y-1 overflow-y-auto">
                 {result.steps.map((s, i) => (
-                  <div key={i} className="flex justify-between text-muted-foreground">
-                    <span>{s.from} → {s.to}</span>
-                    <span className="text-foreground font-medium">+{s.seek}</span>
-                  </div>
+                  <article
+                    key={i}
+                    className={`grid grid-cols-[2rem_1fr_auto] items-center gap-2 border-l-2 px-2 py-2 ${
+                      animStep === i ? "border-primary bg-primary/10" : "border-border"
+                    }`}
+                  >
+                    <span className="font-mono text-[11px] text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="min-w-0">
+                      <span className="block font-mono text-sm font-medium">{s.from} <span className="text-primary">→</span> {s.to}</span>
+                      <span className="mt-1 block h-1 max-w-24 bg-muted">
+                        <span className="block h-full bg-primary" style={{ width: `${Math.max(4, (s.seek / Math.max(...result.steps.map((step) => step.seek), 1)) * 100)}%` }} />
+                      </span>
+                    </span>
+                    <span className="whitespace-nowrap text-right text-xs font-semibold">{s.seek} <span className="font-normal text-muted-foreground">cyl.</span></span>
+                  </article>
                 ))}
               </div>
             </div>

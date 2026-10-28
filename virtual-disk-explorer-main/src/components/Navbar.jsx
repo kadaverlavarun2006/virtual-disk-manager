@@ -3,9 +3,9 @@ import { BarChart3, Disc3, FolderOpen, HardDrive, Moon, Sun } from "lucide-react
 import { useEffect, useState } from "react";
 
 const links = [
-  { to: "/disk-scheduling", label: "Scheduling", icon: Disc3 },
-  { to: "/file-allocation", label: "File allocation", icon: FolderOpen },
-  { to: "/dashboard", label: "History", icon: BarChart3 },
+  { to: "/disk-scheduling", label: "Scheduling", mobileLabel: "Disk", icon: Disc3 },
+  { to: "/file-allocation", label: "File allocation", mobileLabel: "Files", icon: FolderOpen },
+  { to: "/dashboard", label: "History", mobileLabel: "History", icon: BarChart3 },
 ];
 
 export default function Navbar() {
@@ -30,8 +30,8 @@ export default function Navbar() {
           <span className="text-base sm:text-lg">Virtual Disk <span className="text-primary">Manager</span></span>
         </Link>
 
-        <nav aria-label="Main navigation" className="order-3 flex w-full items-center gap-1 overflow-x-auto sm:order-none sm:w-auto">
-          {links.map(({ to, label, icon: Icon }) => (
+        <nav aria-label="Main navigation" className="order-3 flex w-full items-center justify-between gap-1 sm:order-none sm:w-auto sm:justify-start">
+          {links.map(({ to, label, mobileLabel, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -40,15 +40,15 @@ export default function Navbar() {
               }`}
             >
               <Icon className="h-4 w-4" />
-              {label}
+              <span className="hidden sm:inline">{label}</span>
+              <span className="sm:hidden">{mobileLabel}</span>
             </NavLink>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
-          <span className="hidden items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground md:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            SAVED ON THIS DEVICE
+          <span className="hidden text-[11px] font-medium text-muted-foreground md:flex">
+            HISTORY STORED LOCALLY
           </span>
           <button
             type="button"
